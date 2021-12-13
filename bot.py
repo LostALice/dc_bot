@@ -19,7 +19,7 @@ def change_txt(txt):
     return re.sub(ch_txt,"",txt)
 
 #loop function
-def loop__(guild_id):
+def loop_function(guild_id):
     global loop_
     if not guild_id in loop_:
         loop_[guild_id] = False
@@ -46,7 +46,7 @@ def to_playlist(list_):
     return p
 
 #loop song function
-async def loop__song(ctx,vc,guild_id):
+async def loop_song(ctx,vc,guild_id):
     global song_list,play_list
 
     while loop_[guild_id]:
@@ -97,7 +97,7 @@ async def play_song(ctx,vc,guild_id):
             if loop_[guild_id]:
                 await ctx.channel.send(embed = embed, delete_after=10)
                 vc.play(discord.FFmpegPCMAudio(s),after=lambda x=None:
-                    asyncio.run_coroutine_threadsafe(loop__song(ctx,vc,guild_id),client.loop))
+                    asyncio.run_coroutine_threadsafe(loop_song(ctx,vc,guild_id),client.loop))
 
             else:
                 await ctx.channel.send(embed = embed, delete_after=10)
@@ -126,7 +126,7 @@ async def aki(ctx):
 async def loop(ctx):
     global loop_
     guild_id = ctx.message.guild.id
-    loop__(guild_id)
+    loop_function(guild_id)
     if loop_[guild_id]:
         loop_[guild_id] = False
         await ctx.channel.send(f"Stop loop_ing songs!", delete_after=5)
@@ -226,7 +226,7 @@ async def skip(ctx):
         vc.stop()
         guild_id = ctx.message.guild.id
         if loop_[guild_id]:
-            loop__song(ctx,vc,guild_id)
+            loop_song(ctx,vc,guild_id)
         else:
             play_song(ctx,vc,guild_id)
 
@@ -296,7 +296,7 @@ async def play(ctx,*url_: str):
         ch = ctx.author.voice.channel
         await ch.connect()
 
-    loop__(guild_id)
+    loop_function(guild_id)
 
     if guild_id in song_list:
         song_list[guild_id] += to_url(url)
