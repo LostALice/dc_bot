@@ -5,12 +5,10 @@ from pytube import YouTube,Playlist,Search
 from discord.ext import commands
 from bs4 import BeautifulSoup
 
-from token import token
-
 client = commands.Bot(command_prefix="~")
 song_list = {}
 play_list = {}
-loop = {}
+loop_ = {}
 
 if not os.path.exists("./mp3"):
     os.mkdir("./mp3")
@@ -19,10 +17,10 @@ def change_txt(txt):
     ch_txt = r"[\/\\\:\*\?\"\<\>\|\#]"
     return re.sub(ch_txt,"",txt)
 
-def loop_(guild_id):
-    global loop
-    if not guild_id in loop:
-        loop[guild_id] = False
+def loop__(guild_id):
+    global loop_
+    if not guild_id in loop_:
+        loop_[guild_id] = False
 
 def to_url(str_):
     if "https://www.youtube.com/" in str_:
@@ -43,10 +41,10 @@ def to_playlist(list_):
         p.append(yt.title)
     return p
 
-async def loop_song(ctx,vc,guild_id):
+async def loop__song(ctx,vc,guild_id):
     global song_list,play_list
 
-    while loop[guild_id]:
+    while loop_[guild_id]:
         for song in song_list[guild_id]:
             while vc.is_playing():
                 if not vc.is_playing():
@@ -60,13 +58,13 @@ async def loop_song(ctx,vc,guild_id):
             embed = discord.Embed(title=f"Now playing:{yt.title}", url=song,color=discord.Color.from_rgb(241, 196, 15))
             if not vc.is_playing():
                 print(f"{ctx.author}:{title}",flush=True)
-                if loop[guild_id]:
+                if loop_[guild_id]:
                     await ctx.channel.send(embed = embed)
                     vc.play(discord.FFmpegPCMAudio(s))
                 else:
                     await ctx.channel.send(embed = embed, delete_after=5)
                     vc.play(discord.FFmpegPCMAudio(s),after=lambda x=None:
-                        asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop))
+                        asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop_))
 
                     song_list[guild_id].pop(0)
                     play_list[guild_id].pop(0)
@@ -90,15 +88,15 @@ async def play_song(ctx,vc,guild_id):
         embed = discord.Embed(title=f"Now playing:{yt.title}", url=url,color=discord.Color.from_rgb(180, 97, 234))
         if not vc.is_playing():
             print(f"{ctx.author}:{title}",flush=True)
-            if loop[guild_id]:
+            if loop_[guild_id]:
                 await ctx.channel.send(embed = embed, delete_after=5)
                 vc.play(discord.FFmpegPCMAudio(s),after=lambda x=None:
-                    asyncio.run_coroutine_threadsafe(loop_song(ctx,vc,guild_id),client.loop))
+                    asyncio.run_coroutine_threadsafe(loop__song(ctx,vc,guild_id),client.loop_))
 
             else:
                 await ctx.channel.send(embed = embed, delete_after=5)
                 vc.play(discord.FFmpegPCMAudio(s),after=lambda x=None:
-                    asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop))
+                    asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop_))
 
                 song_list[guild_id].pop(0)
                 play_list[guild_id].pop(0)
@@ -109,23 +107,23 @@ async def play_song(ctx,vc,guild_id):
 
 @client.event
 async def on_ready():
-    print("Hey Mister",flush=True)
+    print("Hey Mister!",flush=True)
 
 @client.command(aliases=["a"],help="Ping Aki! [~a]")
 async def aki(ctx):
     await ctx.channel.send(f"Ready DAZE My ping is {client.latency}!", delete_after=5)
 
-@client.command(aliases=["lp"],help="Loop song! [~loop]")
+@client.command(aliases=["loop_"],help="loop_ song! [~loop_]")
 async def loop(ctx):
-    global loop
+    global loop_
     guild_id = ctx.message.guild.id
-    loop_(guild_id)
-    if loop[guild_id]:
-        loop[guild_id] = False
-        await ctx.channel.send(f"Stop looping songs!", delete_after=5)
+    loop__(guild_id)
+    if loop_[guild_id]:
+        loop_[guild_id] = False
+        await ctx.channel.send(f"Stop loop_ing songs!", delete_after=5)
     else:
-        loop[guild_id] = True
-        await ctx.channel.send(f"Looping songs!", delete_after=5)
+        loop_[guild_id] = True
+        await ctx.channel.send(f"loop_ing songs!", delete_after=5)
 
 @client.command(aliases=["pl"],help="List song list [~playlist]")
 async def playlist(ctx):
@@ -180,10 +178,10 @@ async def nhentai(ctx):
 
     await ctx.channel.send(f"Today popular are:{message}")
 
-@client.command(aliases=["WOL","wakeonlan"],help="Wake on lan 'AA:BB:CC:DD:EE:FF'")
+@client.command(aliases=["WOL"],help="Wake on lan 'AA:BB:CC:DD:EE:FF'")
 async def wol(ctx,*_mac_: str):
     a = b""
-    _mac_ = [m for m in _mac_ ]
+    _mac_ = [m for m in _mac_]
 
     for mac in _mac_:
         if len(mac) == 0:
@@ -197,24 +195,23 @@ async def wol(ctx,*_mac_: str):
                 a += struct.pack("B",int(m,16))
             magic = b"\xff" * 6 + a * 16
 
-            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            sock.connect(("192.168.1.255", 9))
-            sock.send(magic)
-
-            sock.close()
+            soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            soc.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1)
+            await soc.sendto(magic,("192.168.1.255",9))
+            soc.close()
             await ctx.channel.send(f"Sent to {':'.join(mac)}", delete_after=5)
         except ValueError as e:
             await ctx.channel.send(f"{e}")
 
 @client.command(aliases=["s"],help="Skip this song [~s]")
 async def skip(ctx):
-    global loop
+    global loop_
     vc = ctx.guild.voice_client
     if vc.is_playing():
         vc.stop()
         guild_id = ctx.message.guild.id
-        if loop[guild_id]:
-            loop_song(ctx,vc,guild_id)
+        if loop_[guild_id]:
+            loop__song(ctx,vc,guild_id)
         else:
             play_song(ctx,vc,guild_id)
 
@@ -254,7 +251,7 @@ async def play(ctx,*url_: str):
 
     guild_id = ctx.message.guild.id
 
-    loop_(guild_id)
+    loop__(guild_id)
 
     if guild_id in song_list:
         song_list[guild_id] += to_url(url)
@@ -266,9 +263,9 @@ async def play(ctx,*url_: str):
     vc = ctx.guild.voice_client
 
     if not vc.is_playing():
-        asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop)
+        asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop_)
     else:
         await ctx.channel.send("Added to play list", delete_after=5)
 
 if __name__ == "__main__":
-    client.run(token)
+    client.run("NzQzOTAxMTU3NjcxMzA1MjY2.XzbZ8Q.uK9xaSHBrZiiAXYlVuAUzHHF_UA")
