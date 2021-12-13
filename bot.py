@@ -122,7 +122,7 @@ async def aki(ctx):
     await ctx.channel.send(f"Ready DAZE My ping is {client.latency}!", delete_after=5)
 
 #Loop song
-@client.command(aliases=["loop_"],help="loop_ song! [~loop_]")
+@client.command(aliases=["lp"],help="loop_ song! [~loop]")
 async def loop(ctx):
     global loop_
     guild_id = ctx.message.guild.id
