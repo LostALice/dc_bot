@@ -107,7 +107,7 @@ async def play_song(ctx,vc,guild_id):
 
 @client.event
 async def on_ready():
-    print("Hey Mister",flush=True)
+    print("Hey Mister!",flush=True)
 
 @client.command(aliases=["a"],help="Ping Aki! [~a]")
 async def aki(ctx):
