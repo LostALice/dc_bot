@@ -5,6 +5,8 @@ from pytube import YouTube,Playlist,Search
 from discord.ext import commands
 from bs4 import BeautifulSoup
 
+from token import token
+
 client = commands.Bot(command_prefix="~")
 song_list = {}
 play_list = {}
@@ -269,4 +271,4 @@ async def play(ctx,*url_: str):
         await ctx.channel.send("Added to play list", delete_after=5)
 
 if __name__ == "__main__":
-    client.run("NzQzOTAxMTU3NjcxMzA1MjY2.XzbZ8Q.RyI3HG3VMMG7qKre93rKTouFId8")
+    client.run(token)
