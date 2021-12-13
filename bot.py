@@ -174,7 +174,7 @@ async def remove(ctx,index: int):
         song_list[guild_id].pop(index-1)
         play_list[guild_id].pop(index-1)
     except:
-        await ctx.channel.send("please input a index in the playlist", delete_after=5)
+        await ctx.channel.send("please input a index in the playlist", delete_after=30)
     await ctx.channel.send("Removed", delete_after=5)
 
 #daily nhentai
