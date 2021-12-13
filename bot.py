@@ -115,8 +115,8 @@ async def on_ready():
 async def aki(ctx):
     await ctx.channel.send(f"Ready DAZE My ping is {client.latency}!", delete_after=5)
 
-@client.command(aliases=["loop"],help="Loop song! [~loop]")
-async def lp(ctx):
+@client.command(aliases=["lp"],help="Loop song! [~loop]")
+async def loop(ctx):
     global loop
     guild_id = ctx.message.guild.id
     loop_(guild_id)
@@ -127,8 +127,8 @@ async def lp(ctx):
         loop[guild_id] = True
         await ctx.channel.send(f"Looping songs!", delete_after=5)
 
-@client.command(aliases=["playlist"],help="List song list [~playlist]")
-async def pl(ctx):
+@client.command(aliases=["pl"],help="List song list [~playlist]")
+async def playlist(ctx):
     text = "```Play next:\n"
     guild_id = ctx.message.guild.id
 
@@ -167,8 +167,8 @@ async def remove(ctx,index: int):
     await ctx.channel.send("Removed")
 
 
-@client.command(help="Show nhentai today popular doujinshi")
-async def nh(ctx):
+@client.command(aliases=["nh"],help="Show nhentai today popular doujinshi")
+async def nhentai(ctx):
     message = ""
     resp = requests.get("https://nhentai.net")
     soup = BeautifulSoup(resp.text, "lxml")
@@ -180,7 +180,7 @@ async def nh(ctx):
 
     await ctx.channel.send(f"Today popular are:{message}")
 
-@client.command(aliases=["WOL"],help="Wake on lan 'AA:BB:CC:DD:EE:FF'")
+@client.command(aliases=["WOL","wakeonlan"],help="Wake on lan 'AA:BB:CC:DD:EE:FF'")
 async def wol(ctx,*_mac_: str):
     a = b""
     _mac_ = [m for m in _mac_ ]
