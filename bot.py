@@ -313,4 +313,4 @@ async def play(ctx,*url_: str):
         await ctx.channel.send("Added to play list", delete_after=5)
 
 if __name__ == "__main__":
-    client.run("NzQzOTAxMTU3NjcxMzA1MjY2.XzbZ8Q.uK9xaSHBrZiiAXYlVuAUzHHF_UA")
+    client.run(os.getenv("token"))
