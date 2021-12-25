@@ -248,7 +248,7 @@ async def swap(ctx,*index_: int):
     song_list[guild_id][index_[0]-1],song_list[guild_id][index_[1]-1] = song_list[guild_id][index_[1]-1],song_list[guild_id][index_[0]-1]
     play_list[guild_id][index_[0]-1],play_list[guild_id][index_[1]-1] = play_list[guild_id][index_[1]-1],play_list[guild_id][index_[0]-1]
 
-    await ctx.channel.send("Switched", delete_after=5)
+    await ctx.channel.send("Swapped", delete_after=5)
 
 #play song
 @client.command(pass_context=True,aliases=["p"],help="Play some songs [~p]")
