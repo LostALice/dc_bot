@@ -122,17 +122,17 @@ async def aki(ctx):
     await ctx.channel.send(f"Ready DAZE My ping is {client.latency}!", delete_after=5)
 
 #Loop song
-@client.command(aliases=["lp"],help="loop_ song! [~loop]")
+@client.command(aliases=["lp"],help="loop song! [~loop]")
 async def loop(ctx):
     global loop_
     guild_id = ctx.message.guild.id
     loop_function(guild_id)
     if loop_[guild_id]:
         loop_[guild_id] = False
-        await ctx.channel.send(f"Stop loop_ing songs!", delete_after=5)
+        await ctx.channel.send(f"Stop looping songs!", delete_after=5)
     else:
         loop_[guild_id] = True
-        await ctx.channel.send(f"loop_ing songs!", delete_after=5)
+        await ctx.channel.send(f"looping songs!", delete_after=5)
 
 #Show the playlist
 @client.command(aliases=["pl"],help="List song list [~playlist]")
