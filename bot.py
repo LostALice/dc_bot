@@ -191,32 +191,6 @@ async def nhentai(ctx):
 
     await ctx.channel.send(f"Today popular are:{message}")
 
-#wol
-@client.command(aliases=["WOL"],help="Wake on lan 'AA:BB:CC:DD:EE:FF'")
-async def wol(ctx,*_mac_: str):
-    a = b""
-    _mac_ = [m for m in _mac_]
-
-    for mac in _mac_:
-        if len(mac) == 0:
-            mac = "00:d8:61:c8:ed:39".split(":")
-        elif len(mac) == 17:
-            mac = mac.split(f"{mac[2]}")
-        elif len(mac) == 12:
-            mac = [mac[i:i+2] for i in range(0, 12, 2)]
-        try:
-            for m in mac[0].split(":"):
-                a += struct.pack("B",int(m,16))
-            magic = b"\xff" * 6 + a * 16
-
-            soc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            soc.setsockopt(socket.SOL_SOCKET,socket.SO_BROADCAST,1)
-            await soc.sendto(magic,("192.168.1.255",9))
-            soc.close()
-            await ctx.channel.send(f"Sent to {':'.join(mac)}", delete_after=5)
-        except ValueError as e:
-            await ctx.channel.send(f"{e}")
-
 #skip song
 @client.command(aliases=["s"],help="Skip this song [~s]")
 async def skip(ctx):
