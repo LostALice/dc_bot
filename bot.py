@@ -1,6 +1,6 @@
 #Code by Aki.no.Alice@Tyrant_Rex
 
-import requests,re,discord,os,socket,struct,asyncio
+import requests,re,discord,os,asyncio
 from pytube import YouTube,Playlist,Search
 from discord.ext import commands
 from bs4 import BeautifulSoup
