@@ -1,9 +1,8 @@
 #Code by Aki.no.Alice@Tyrant_Rex
 
-import requests,re,discord,os,asyncio
 from pytube import YouTube,Playlist,Search
 from discord.ext import commands
-from bs4 import BeautifulSoup
+import re,discord,os,asyncio
 
 client = commands.Bot(command_prefix="~")
 song_list = {}
@@ -122,7 +121,7 @@ async def aki(ctx):
     await ctx.channel.send(f"Ready DAZE My ping is {client.latency}!", delete_after=5)
 
 #Loop song
-@client.command(aliases=["lp"],help="loop song! [~loop]")
+@client.command(aliases=["lp","l","L"],help="loop song! [~lp,l]")
 async def loop(ctx):
     global loop_
     guild_id = ctx.message.guild.id
@@ -135,7 +134,7 @@ async def loop(ctx):
         await ctx.channel.send(f"looping songs!", delete_after=5)
 
 #Show the playlist
-@client.command(aliases=["pl"],help="List song list [~playlist]")
+@client.command(aliases=["pl","PL"],help="List song list [~pl,PL]")
 async def playlist(ctx):
     text = "```Play next:\n"
     guild_id = ctx.message.guild.id
@@ -153,7 +152,7 @@ async def playlist(ctx):
     await ctx.channel.send(text, delete_after=10)
 
 #clear songlist, playlist
-@client.command(aliases=["clr"],help="Clear song list [~clr]")
+@client.command(aliases=["clr","c","C"],help="Clear song list [~clr,c]")
 async def clear(ctx):
     guild_id = ctx.message.guild.id
     if guild_id in song_list:
@@ -164,7 +163,7 @@ async def clear(ctx):
     await ctx.channel.send("Cleared", delete_after=5)
 
 #remove songlist, playlist from index
-@client.command(aliases=["rm"],help="Remove a song in playlist \{~rm (playlist index)\} [~rm]")
+@client.command(aliases=["rm","r","R"],help="Remove a song in playlist {~rm index1} [~rm]")
 async def remove(ctx,index: int):
     global play_list,song_list
 
@@ -177,22 +176,8 @@ async def remove(ctx,index: int):
         await ctx.channel.send("please input a index in the playlist", delete_after=30)
     await ctx.channel.send("Removed", delete_after=5)
 
-#daily nhentai
-@client.command(aliases=["nh"],help="Show nhentai today popular doujinshi")
-async def nhentai(ctx):
-    message = ""
-    resp = requests.get("https://nhentai.net")
-    soup = BeautifulSoup(resp.text, "lxml")
-    page = soup.find_all(href=re.compile("/g/"))[:5]
-    for p in page:
-        url = p.get("href")
-        code = url.replace("g", "").replace("/","")
-        message += f"\n{code}\nhttps://nhentai.net{url}"
-
-    await ctx.channel.send(f"Today popular are:{message}")
-
 #skip song
-@client.command(aliases=["s"],help="Skip this song [~s]")
+@client.command(aliases=["s","S"],help="Skip this song [~s]")
 async def skip(ctx):
     global loop_
     vc = ctx.guild.voice_client
@@ -209,8 +194,8 @@ async def skip(ctx):
         await ctx.channel.send("Oniichan I am not playing song", delete_after=5)
 
 #quit channel
-@client.command(aliases=["quit","q"],help="Leave this channel [~quit,~q]")
-async def leave(ctx):
+@client.command(aliases=["q","Q"],help="Leave this channel [~q]")
+async def quit(ctx):
     global song_list,play_list
 
     guild_id = ctx.message.guild.id
@@ -223,12 +208,12 @@ async def leave(ctx):
         await ctx.channel.send("Oniichan I am not in this voice channel", delete_after=5)
 
 #DSE time table
-@client.command(aliases=["DSE","time"],help="Check DSE time remain")
+@client.command(aliases=["DSE"],help="Check DSE time table")
 async def dse(ctx):
     await ctx.channel.send(file=discord.File("dse.jpg"))
 
 #swap order
-@client.command(aliases=["sw"],help="Swap the index")
+@client.command(aliases=["sw","SW"],help="Swap the index {~sw index1 index2} [~sw]")
 async def swap(ctx,*index_: int):
     global play_list,song_list
 
@@ -251,7 +236,7 @@ async def swap(ctx,*index_: int):
     await ctx.channel.send("Swapped", delete_after=5)
 
 #play song
-@client.command(pass_context=True,aliases=["p"],help="Play some songs [~p]")
+@client.command(pass_context=True,aliases=["p","P"],help="Play some songs [~p]")
 async def play(ctx,*url_: str):
     global song_list,play_list
     url = " "
