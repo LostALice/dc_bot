@@ -1,10 +1,10 @@
 #Code by Aki.no.Alice@Tyrant_Rex
 
-from pytube import YouTube,Playlist,Search
+from pytube import YouTube, Playlist, Search
 from discord.ext import commands
-import re,discord,os,asyncio
+import re, discord, os, asyncio
 
-client = commands.Bot(command_prefix="~")
+client = commands.Bot(command_prefix="~",activity=discord.Game(name="HONG KONG DIPLOMA OF SECONDARY EDUCATION EXAMINATION 2022"))
 song_list = {}
 play_list = {}
 loop_ = {}
@@ -214,6 +214,13 @@ async def quit(ctx):
 async def dse(ctx):
     await ctx.channel.send(file=discord.File("dse.jpg"))
 
+async def dse_():
+    await client.wait_until_ready()
+    while True:
+        channel = client.get_channel(576796473027592233 )
+        await channel.send(file=discord.File("dse.jpg"))
+        await asyncio.sleep(3600)
+
 #swap order
 @client.command(aliases=["sw","SW"],help="Swap the index {~sw index1 index2} [~sw]")
 async def swap(ctx,*index_: int):
@@ -274,4 +281,5 @@ async def play(ctx,*url_: str):
         await ctx.channel.send("Added to play list", delete_after=5)
 
 if __name__ == "__main__":
+    client.loop.create_task(dse_())
     client.run(os.getenv("token"))
