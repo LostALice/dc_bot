@@ -33,6 +33,8 @@ def to_url(str_):
                 return list(Playlist(str_))[:50]
         else:
             return [str_]
+    elif " https://youtu.be/" in str_:
+        return [str_.replace("https://youtu.be/","https://www.youtube.com/watch?v=")]
     else:
         return [Search(str_).results[0].watch_url]
 
