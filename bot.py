@@ -108,9 +108,8 @@ async def play_song(ctx,vc,guild_id):
                 song_list[guild_id].pop(0)
                 play_list[guild_id].pop(0)
     else:
-        await asyncio.sleep(60)
-        await ctx.channel.send("Bye Bye", delete_after=5)
         await ctx.voice_client.disconnect()
+        await ctx.channel.send("Bye Bye", delete_after=5)
 
 #on ready
 @client.event
