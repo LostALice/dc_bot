@@ -218,7 +218,7 @@ async def dse_():
     while True:
         channel = client.get_channel(576796473027592233 )
         await channel.send(file=discord.File("dse.jpg"))
-        await asyncio.sleep(3600)
+        await asyncio.sleep(3600*24)
 
 #swap order
 @client.command(aliases=["sw","SW"],help="Swap the index {~sw index1 index2} [~sw]")
