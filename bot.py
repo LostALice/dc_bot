@@ -4,6 +4,7 @@ from pytube import YouTube, Playlist, Search
 from discord.ext import commands
 import re, discord, os, asyncio
 from yt_dlp import YoutubeDL
+from os import getenv
 
 client = commands.Bot(command_prefix="~",activity=discord.Game(name="HONG KONG DIPLOMA OF SECONDARY EDUCATION EXAMINATION 2022"))
 song_list = {}
@@ -315,5 +316,5 @@ async def play(ctx,*url_: str):
         await ctx.channel.send("Added to play list", delete_after=5)
 
 if __name__ == "__main__":
-    #client.loop.create_task(dse_())
-    client.run("NzQzOTAxMTU3NjcxMzA1MjY2.XzbZ8Q.uK9xaSHBrZiiAXYlVuAUzHHF_UA")
+    client.loop.create_task(dse_())
+    client.run(getenv("token"))
