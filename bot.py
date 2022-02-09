@@ -3,6 +3,7 @@
 from pytube import YouTube, Playlist, Search
 from discord.ext import commands
 import re, discord, os, asyncio
+from yt_dlp import YoutubeDL
 
 client = commands.Bot(command_prefix="~",activity=discord.Game(name="HONG KONG DIPLOMA OF SECONDARY EDUCATION EXAMINATION 2022"))
 song_list = {}
@@ -56,20 +57,25 @@ async def loop_song(ctx,vc,guild_id):
                 if not vc.is_playing():
                     break
             yt = YouTube(song)
-
             title = change_txt(yt.title)
+            ydl_opts = {
+                "format": "bestaudio",
+                "outtmpl": f"./mp3/{title}.mp3"
+            }
+
             if not os.path.exists(f"./mp3/{title}.mp3"):
-                s = yt.streams.filter(only_audio=True).first().download(output_path="./mp3/")
+                with YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([song])
 
             embed = discord.Embed(title=f"Now playing:{yt.title}", url=song,color=discord.Color.from_rgb(241, 196, 15))
             if not vc.is_playing():
-                print(f"{ctx.author}:{title}",flush=True)
+                print(f"\n{ctx.author} -> {ctx.message.guild} -> {ctx.author.voice.channel}:{title}",flush=True)
                 if loop_[guild_id]:
                     await ctx.channel.send(embed = embed, delete_after=10)
-                    vc.play(discord.FFmpegPCMAudio(s))
+                    vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]))
                 else:
                     await ctx.channel.send(embed = embed, delete_after=10)
-                    vc.play(discord.FFmpegPCMAudio(s),after=lambda x=None:
+                    vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]),after=lambda x=None:
                         asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop))
 
                     song_list[guild_id].pop(0)
@@ -84,25 +90,31 @@ async def play_song(ctx,vc,guild_id):
 
     if song_list[guild_id] != []:
         url = song_list[guild_id][0]
-        yt = YouTube(url)
 
+        yt = YouTube(url)
         title = change_txt(yt.title)
-        if not os.path.exists(f"./mp3/{title}.mp4"):
-            s = yt.streams.filter(only_audio=True).first().download("./mp3/")
-        else:
-            s = f"./mp3/{title}.mp4"
+
+        ydl_opts = {
+            "format": "bestaudio",
+            "outtmpl": f"./mp3/{title}.mp3"
+        }
+
+        if not os.path.exists(f"./mp3/{title}.mp3"):
+            with YoutubeDL(ydl_opts) as ydl:
+                ydl.download([url])
 
         embed = discord.Embed(title=f"Now playing:{yt.title}", url=url,color=discord.Color.from_rgb(180, 97, 234))
         if not vc.is_playing():
-            print(f"{ctx.author}:{title}",flush=True)
+            print(f"\n{ctx.author} -> {ctx.message.guild} -> {ctx.author.voice.channel}:{title}",flush=True)
+
             if loop_[guild_id]:
                 await ctx.channel.send(embed = embed, delete_after=10)
-                vc.play(discord.FFmpegPCMAudio(s),after=lambda x=None:
+                vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]),after=lambda x=None:
                     asyncio.run_coroutine_threadsafe(loop_song(ctx,vc,guild_id),client.loop))
 
             else:
                 await ctx.channel.send(embed = embed, delete_after=10)
-                vc.play(discord.FFmpegPCMAudio(s),after=lambda x=None:
+                vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]),after=lambda x=None:
                     asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop))
 
                 song_list[guild_id].pop(0)
@@ -114,15 +126,15 @@ async def play_song(ctx,vc,guild_id):
 #on ready
 @client.event
 async def on_ready():
-    print("Hey Mister!",flush=True)
+    print("\nHey Mister!",flush=True)
 
 #aki daze!
-@client.command(help="Aki daze!")
+@client.command(help="""Aki daze!""")
 async def aki(ctx):
     await ctx.channel.send(f"Ready DAZE My ping is {client.latency}!", delete_after=5)
 
 #Loop song
-@client.command(aliases=["lp","l","L"],help="loop song! [~lp,l]")
+@client.command(aliases=["lp","l","L"],help="""loop song! [~lp,l]""")
 async def loop(ctx):
     global loop_
     guild_id = ctx.message.guild.id
@@ -135,7 +147,7 @@ async def loop(ctx):
         await ctx.channel.send(f"looping songs!", delete_after=5)
 
 #Show the playlist
-@client.command(aliases=["pl","PL"],help="List song list [~pl,PL]")
+@client.command(aliases=["pl","PL"],help="""List song list [~pl,PL]""")
 async def playlist(ctx):
     text = "```Play next:\n"
     guild_id = ctx.message.guild.id
@@ -150,10 +162,10 @@ async def playlist(ctx):
         text += "None"
 
     text += "```"
-    await ctx.channel.send(text, delete_after=10)
+    await ctx.channel.send(text)
 
 #clear songlist, playlist
-@client.command(aliases=["clr","c","C"],help="Clear song list [~clr,c]")
+@client.command(aliases=["clr","c","C"],help="""Clear song list [~clr,c]""")
 async def clear(ctx):
     guild_id = ctx.message.guild.id
     if guild_id in song_list:
@@ -164,7 +176,7 @@ async def clear(ctx):
     await ctx.channel.send("Cleared", delete_after=5)
 
 #remove songlist, playlist from index
-@client.command(aliases=["rm","r","R"],help="Remove a song in playlist {~rm index1} [~rm]")
+@client.command(aliases=["rm","r","R"],help="""Remove a song in playlist {~rm index1} [~rm]""")
 async def remove(ctx,index: int):
     global play_list,song_list
 
@@ -178,7 +190,7 @@ async def remove(ctx,index: int):
     await ctx.channel.send("Removed", delete_after=5)
 
 #skip song
-@client.command(aliases=["s","S"],help="Skip this song [~s]")
+@client.command(aliases=["s","S"],help="""Skip this song [~s]""")
 async def skip(ctx):
     global loop_
     vc = ctx.guild.voice_client
@@ -195,7 +207,7 @@ async def skip(ctx):
         await ctx.channel.send("Oniichan I am not playing song", delete_after=5)
 
 #quit channel
-@client.command(aliases=["q","Q"],help="Leave this channel [~q]")
+@client.command(aliases=["q","Q"],help="""Leave this channel [~q]""")
 async def quit(ctx):
     global song_list,play_list
 
@@ -209,7 +221,7 @@ async def quit(ctx):
         await ctx.channel.send("Oniichan I am not in this voice channel", delete_after=5)
 
 #DSE time table
-@client.command(aliases=["DSE"],help="Check DSE time table")
+@client.command(aliases=["DSE"],help="""Check DSE time table""")
 async def dse(ctx):
     await ctx.channel.send(file=discord.File("dse.jpg"))
 
@@ -221,7 +233,7 @@ async def dse_():
         await asyncio.sleep(3600*24)
 
 #swap order
-@client.command(aliases=["sw","SW"],help="Swap the index {~sw index1 index2} [~sw]")
+@client.command(aliases=["sw","SW"],help="""Swap the index {~sw index1 index2} [~sw]""")
 async def swap(ctx,*index_: int):
     global play_list,song_list
 
@@ -243,8 +255,30 @@ async def swap(ctx,*index_: int):
 
     await ctx.channel.send("Swapped", delete_after=5)
 
+#play next
+@client.command(aliases=["pn","PN"],help="""Set a song play next {~sw index1} ["pn","PN"]""")
+async def playnext(ctx,*index_: int):
+    global play_list,song_list
+
+    guild_id = ctx.message.guild.id
+    count = len(song_list[guild_id])
+
+    if len(index_) != 1:
+        await ctx.channel.send("Please input valid index")
+        return
+    try:
+        index = int(index_[0])
+    except TypeError:
+        await ctx.channel.send("Please input valid index")
+        return
+
+    song_list[guild_id].insert(0, song_list[guild_id].pop(index-1))
+    play_list[guild_id].insert(0, play_list[guild_id].pop(index-1))
+
+    await ctx.channel.send(f"Next song will be {play_list[guild_id][0]}", delete_after=5)
+
 #play song
-@client.command(pass_context=True,aliases=["p","P"],help="Play some songs [~p]")
+@client.command(pass_context=True,aliases=["p","P"],help="""Play some songs [~p]""")
 async def play(ctx,*url_: str):
     global song_list,play_list
     url = " "
@@ -255,6 +289,7 @@ async def play(ctx,*url_: str):
         url = url.join(url_)
 
     guild_id = ctx.message.guild.id
+
     if not ctx.voice_client:
         if guild_id in song_list:
             song_list[guild_id] = []
@@ -280,5 +315,5 @@ async def play(ctx,*url_: str):
         await ctx.channel.send("Added to play list", delete_after=5)
 
 if __name__ == "__main__":
-    client.loop.create_task(dse_())
-    client.run(os.getenv("token"))
+    #client.loop.create_task(dse_())
+    client.run("NzQzOTAxMTU3NjcxMzA1MjY2.XzbZ8Q.uK9xaSHBrZiiAXYlVuAUzHHF_UA")
