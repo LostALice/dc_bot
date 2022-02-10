@@ -1,8 +1,9 @@
 #Code by Aki.no.Alice@Tyrant_Rex
 
 from pytube import YouTube, Playlist, Search
+import re, discord, os, asyncio ,requests
 from discord.ext import commands
-import re, discord, os, asyncio
+from bs4 import BeautifulSoup
 from yt_dlp import YoutubeDL
 from os import getenv
 
@@ -221,6 +222,36 @@ async def quit(ctx):
     except:
         await ctx.channel.send("Oniichan I am not in this voice channel", delete_after=5)
 
+#Daily nhentai
+@client.command(help="""Show nhentai today popular doujinshi""")
+async def nh(ctx):
+    message = ""
+    resp = requests.get("https://nhentai.net")
+    soup = BeautifulSoup(resp.text, "lxml")
+    page = soup.find_all(href=re.compile("/g/"))[:5]
+    for p in page:
+        url = p.get("href")
+        code = url.replace("g", "").replace("/","")
+        message += f"\n{code}\nhttps://nhentai.net{url}"
+
+    await ctx.channel.send(f"Today popular are:{message}")
+
+async def nh_():
+    await client.wait_until_ready()
+    while True:
+        message = ""
+        resp = requests.get("https://nhentai.net")
+        soup = BeautifulSoup(resp.text, "lxml")
+        page = soup.find_all(href=re.compile("/g/"))[:5]
+        for p in page:
+            url = p.get("href")
+            code = url.replace("g", "").replace("/","")
+            message += f"\n{code}\nhttps://nhentai.net{url}"
+
+        channel = client.get_channel(941323286846013440)
+        await channel.send(f"Today popular are:{message}")
+        await asyncio.sleep(86400)
+
 #DSE time table
 @client.command(aliases=["DSE"],help="""Check DSE time table""")
 async def dse(ctx):
@@ -229,9 +260,9 @@ async def dse(ctx):
 async def dse_():
     await client.wait_until_ready()
     while True:
-        channel = client.get_channel(576796473027592233 )
+        channel = client.get_channel(576796473027592233)
         await channel.send(file=discord.File("dse.jpg"))
-        await asyncio.sleep(3600*24)
+        await asyncio.sleep(86400)
 
 #swap order
 @client.command(aliases=["sw","SW"],help="""Swap the index {~sw index1 index2} [~sw]""")
@@ -317,4 +348,5 @@ async def play(ctx,*url_: str):
 
 if __name__ == "__main__":
     client.loop.create_task(dse_())
+    client.loop.create_task(nh_())
     client.run(getenv("token"))
