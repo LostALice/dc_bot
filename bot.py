@@ -1,7 +1,8 @@
 #Code by Aki.no.Alice@Tyrant_Rex
 
+import re, discord, os, asyncio, requests
+
 from pytube import YouTube, Playlist, Search
-import re, discord, os, asyncio ,requests
 from discord.ext import commands
 from bs4 import BeautifulSoup
 from yt_dlp import YoutubeDL
@@ -28,18 +29,19 @@ def loop_function(guild_id):
 
 #return youtube results function
 def to_url(str_):
-    if "https://www.youtube.com/" in str_:
-        if "list=" in str_ and "https://www.youtube.com/" in str_:
-            if len(list(Playlist(str_))) <= 50:
-                return list(Playlist(str_))
-            else:
-                return list(Playlist(str_))[:50]
+    if "list=" in str_:
+        _ =  len(Playlist(str_))
+        if _ == 0:
+            return [YouTube(str_).watch_url]
+        elif _ >= 50:
+            return list(Playlist(str_))[:50]
         else:
-            return [str_]
-    elif " https://youtu.be/" in str_:
-        return [str_.replace("https://youtu.be/","https://www.youtube.com/watch?v=")]
+            return list(Playlist(str_))
     else:
-        return [Search(str_).results[0].watch_url]
+        try:
+            return [YouTube(str_).watch_url]
+        except:
+            return [Search(str_).results[0].watch_url]
 
 #return youtube list function
 def to_playlist(list_):
