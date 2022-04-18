@@ -1,7 +1,8 @@
 #Code by Aki.no.Alice@Tyrant_Rex
 
-from pytube import YouTube,Playlist,Search
 import re,discord,os,asyncio,requests
+
+from pytube import YouTube,Playlist,Search
 from discord.ext import commands
 from bs4 import BeautifulSoup
 from yt_dlp import YoutubeDL
@@ -9,15 +10,40 @@ from os import getenv
 
 client = commands.Bot(command_prefix="~",activity=discord.Game(name="HONG KONG DIPLOMA OF SECONDARY EDUCATION EXAMINATION 2022"))
 song_list = {}
+    # song_list
+
+    # Returns:
+    #     {
+    #         "guild_id":["song_list"],
+    #         "guild_id":["song_list"],
+    # }
+
 play_list = {}
-loop_ = {}
+    # play_list
+
+    # Returns:
+    #     {
+    #         "guild_id":["play_list"],
+    #         "guild_id":["play_list"],
+    # }
+
+channel_opts = {}
+    # channel_opts
+
+    # Returns:
+    #     {
+    #         "guild_id":{
+    #             "loop":     False,
+    #             "random":   False,
+    #         },
+    #         "guild_id":{
+    #             "loop":     False,
+    #             "random":   False,
+    #         },
+    # }
 
 if not os.path.exists("./mp3"):
     os.mkdir("./mp3")
-
-#delete the discord commands
-def del_command(message_id):
-    pass
 
 #change file name function
 def change_txt(txt):
@@ -26,9 +52,13 @@ def change_txt(txt):
 
 #loop function
 def loop_function(guild_id):
-    global loop_
-    if not guild_id in loop_:
-        loop_[guild_id] = False
+    global channel_opts
+
+    if channel_opts.get(guild_id) == None:
+        channel_opts[guild_id] = {
+            "loop":     False,
+            "random":   False
+        }
 
 #return youtube results function
 def to_url(str_):
@@ -58,7 +88,7 @@ def to_playlist(list_):
 async def loop_song(ctx,vc,guild_id):
     global song_list,play_list
 
-    while loop_[guild_id]:
+    while channel_opts[guild_id]["loop"]:
         for song in song_list[guild_id]:
             while vc.is_playing():
                 if not vc.is_playing():
@@ -67,7 +97,7 @@ async def loop_song(ctx,vc,guild_id):
             title = change_txt(yt.title)
 
             if yt.length > 1800:
-                await ctx.channel.send(f"The duration of the song is too long\nTitle-> {title}\nDuration-> {int(yt.length/3600)}:{int(yt.length/60)%60}:{int(yt.length%60)}", delete_after=15)
+                await ctx.channel.send(f"The duration of the song is too long\nTitle-> {title}\nDuration-> {int(yt.length/3600)}:{int(yt.length/60)%60}:{int(yt.length%60)}", delete_after=10)
                 return
 
             ydl_opts = {
@@ -79,14 +109,14 @@ async def loop_song(ctx,vc,guild_id):
                 with YoutubeDL(ydl_opts) as ydl:
                     ydl.download([song])
 
-            embed = discord.Embed(title=f"Now playing:{yt.title}", url=song,color=discord.Color.from_rgb(241, 196, 15))
+            embed = discord.Embed(title=f"Now playing:{yt.title} \nBy {ctx.author}", url=song,color=discord.Color.from_rgb(241, 196, 15))
             if not vc.is_playing():
                 print(f"\n{ctx.author} -> {ctx.message.guild} -> {ctx.author.voice.channel}:{title}",flush=True)
-                if loop_[guild_id]:
-                    await ctx.channel.send(embed = embed, delete_after=yt.length)
+                if channel_opts[guild_id]["loop"]:
+                    await ctx.channel.send(embed = embed, delete_after=yt.length-1)
                     vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]))
                 else:
-                    await ctx.channel.send(embed = embed, delete_after=yt.length)
+                    await ctx.channel.send(embed = embed, delete_after=yt.length-1)
                     vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]),after=lambda x=None:
                         asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop))
 
@@ -107,7 +137,7 @@ async def play_song(ctx,vc,guild_id):
         title = change_txt(yt.title)
 
         if yt.length > 1800:
-            await ctx.channel.send(f"The duration of the song is too long\nTitle-> {title}\nDuration-> {int(yt.length/3600)}:{int(yt.length/60)%60}:{int(yt.length%60)}", delete_after=15)
+            await ctx.channel.send(f"The duration of the song is too long\nTitle-> {title}\nDuration-> {int(yt.length/3600)}:{int(yt.length/60)%60}:{int(yt.length%60)}", delete_after=10)
             return
 
         ydl_opts = {
@@ -119,17 +149,17 @@ async def play_song(ctx,vc,guild_id):
             with YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
 
-        embed = discord.Embed(title=f"Now playing:{yt.title}", url=url,color=discord.Color.from_rgb(180, 97, 234))
+        embed = discord.Embed(title=f"Now playing:{yt.title} \nBy {ctx.author}", url=url,color=discord.Color.from_rgb(180, 97, 234))
         if not vc.is_playing():
             print(f"\n{ctx.author} -> {ctx.message.guild} -> {ctx.author.voice.channel}:{title}",flush=True)
 
-            if loop_[guild_id]:
-                await ctx.channel.send(embed = embed, delete_after=yt.length)
+            if channel_opts[guild_id]["loop"]:
+                await ctx.channel.send(embed = embed, delete_after=yt.length-1)
                 vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]),after=lambda x=None:
                     asyncio.run_coroutine_threadsafe(loop_song(ctx,vc,guild_id),client.loop))
 
             else:
-                await ctx.channel.send(embed = embed, delete_after=yt.length)
+                await ctx.channel.send(embed = embed, delete_after=yt.length-1)
                 vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]),after=lambda x=None:
                     asyncio.run_coroutine_threadsafe(play_song(ctx,vc,guild_id),client.loop))
 
@@ -153,20 +183,20 @@ async def aki(ctx):
 #loop song
 @client.command(aliases=["lp","l","L"],help="""loop song! [~lp,l]""")
 async def loop(ctx):
-    global loop_
+    global channel_opts
     await ctx.channel.purge(limit=1)
     guild_id = ctx.message.guild.id
 
     loop_function(guild_id)
-    if loop_[guild_id]:
-        loop_[guild_id] = False
-        await ctx.channel.send(f"Stop looping songs!", delete_after=10)
+    if channel_opts[guild_id]["loop"]:
+        channel_opts[guild_id]["loop"] = False
+        await ctx.channel.send(f"Stop looping songs!", delete_after=5)
     else:
-        loop_[guild_id] = True
-        await ctx.channel.send(f"looping songs!", delete_after=10)
+        channel_opts[guild_id]["loop"] = True
+        await ctx.channel.send(f"Looping songs!", delete_after=5)
 
 #show the playlist
-@client.command(aliases=["pl","PL"],help="""List song list [~pl,PL]""")
+@client.command(aliases=["pl","PL"],help="""List song list [~pl]""")
 async def playlist(ctx):
     text = "```Play next:\n"
     guild_id = ctx.message.guild.id
@@ -194,10 +224,10 @@ async def clear(ctx):
         play_list[guild_id] = []
     vc = ctx.guild.voice_client
     vc.stop()
-    await ctx.channel.send("Cleared", delete_after=10)
+    await ctx.channel.send("Cleared", delete_after=5)
 
 #remove songlist, playlist from index
-@client.command(aliases=["rm","r","R"],help="""Remove a song in playlist {~rm index1} [~rm]""")
+@client.command(aliases=["rm","r","R"],help="""Remove a song in playlist {~rm index1} [~rm,r]""")
 async def remove(ctx,index: int):
     global play_list,song_list
     await ctx.channel.purge(limit=1)
@@ -208,27 +238,27 @@ async def remove(ctx,index: int):
         song_list[guild_id].pop(index-1)
         play_list[guild_id].pop(index-1)
     except:
-        await ctx.channel.send("please input a index in the playlist", delete_after=30)
-    await ctx.channel.send("Removed", delete_after=10)
+        await ctx.channel.send("Please input a index in the playlist niinii :<", delete_after=30)
+    await ctx.channel.send("Removed", delete_after=5)
 
 #skip song
 @client.command(aliases=["s","S"],help="""Skip this song [~s]""")
 async def skip(ctx):
-    global loop_
+    global channel_opts
     await ctx.channel.purge(limit=1)
 
     vc = ctx.guild.voice_client
     if vc.is_playing():
         vc.stop()
         guild_id = ctx.message.guild.id
-        if loop_[guild_id]:
+        if channel_opts[guild_id]["loop"]:
             loop_song(ctx,vc,guild_id)
         else:
             play_song(ctx,vc,guild_id)
 
-        await ctx.channel.send("Skiped", delete_after=10)
+        await ctx.channel.send("Skiped", delete_after=5)
     else:
-        await ctx.channel.send("Oniichan I am not playing song", delete_after=10)
+        await ctx.channel.send("Oniichan I am not playing song :<", delete_after=10)
 
 #quit channel
 @client.command(aliases=["q","Q"],help="""Leave this channel [~q]""")
@@ -269,22 +299,22 @@ async def swap(ctx,*index_: int):
     count = len(song_list[guild_id])
 
     if len(index_) != 2:
-        await ctx.channel.send("Please input valid index")
+        await ctx.channel.send("Please input valid index niinii", delete_after=10)
         return
     elif index_[0] < 0 or index_[1] < 0:
-        await ctx.channel.send("Please input valid index")
+        await ctx.channel.send("Please input valid index niinii", delete_after=10)
         return
     elif index_[0] > count or index_[1] > count:
-        await ctx.channel.send("Please input valid index")
+        await ctx.channel.send("Please input valid index niinii", delete_after=10)
         return
 
     song_list[guild_id][index_[0]-1],song_list[guild_id][index_[1]-1] = song_list[guild_id][index_[1]-1],song_list[guild_id][index_[0]-1]
     play_list[guild_id][index_[0]-1],play_list[guild_id][index_[1]-1] = play_list[guild_id][index_[1]-1],play_list[guild_id][index_[0]-1]
 
-    await ctx.channel.send("Swapped", delete_after=10)
+    await ctx.channel.send("Swapped", delete_after=5)
 
 #play next
-@client.command(aliases=["pn","PN"],help="""Set a song play next {~sw index1} ["pn","PN"]""")
+@client.command(aliases=["pn","PN"],help="""Set a song play next {~pn index1} ["pn",]""")
 async def playnext(ctx,*index_: int):
     global play_list,song_list
     await ctx.channel.purge(limit=1)
@@ -292,12 +322,12 @@ async def playnext(ctx,*index_: int):
     count = len(song_list[guild_id])
 
     if len(index_) != 1:
-        await ctx.channel.send("Please input valid index")
+        await ctx.channel.send("Please input valid index niinii", delete_after=10)
         return
     try:
         index = int(index_[0])
     except TypeError:
-        await ctx.channel.send("Please input valid index")
+        await ctx.channel.send("Please input valid index niinii", delete_after=10)
         return
 
     song_list[guild_id].insert(0, song_list[guild_id].pop(index-1))
