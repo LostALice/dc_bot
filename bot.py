@@ -66,8 +66,8 @@ def to_url(str_):
         _ =  len(Playlist(str_))
         if _ == 0:
             return [YouTube(str_).watch_url]
-        elif _ >= 50:
-            return list(Playlist(str_))[:50]
+        elif _ >= 75:
+            return list(Playlist(str_))[:75]
         else:
             return list(Playlist(str_))
     else:
@@ -96,7 +96,7 @@ async def loop_song(ctx,vc,guild_id):
             yt = YouTube(song)
             title = change_txt(yt.title)
 
-            if yt.length > 1800:
+            if yt.length > 5400:
                 await ctx.channel.send(f"The duration of the song is too long\nTitle-> {title}\nDuration-> {int(yt.length/3600)}:{int(yt.length/60)%60}:{int(yt.length%60)}", delete_after=10)
                 return
 
@@ -136,7 +136,7 @@ async def play_song(ctx,vc,guild_id):
         yt = YouTube(url)
         title = change_txt(yt.title)
 
-        if yt.length > 1800:
+        if yt.length > 5400:
             await ctx.channel.send(f"The duration of the song is too long\nTitle-> {title}\nDuration-> {int(yt.length/3600)}:{int(yt.length/60)%60}:{int(yt.length%60)}", delete_after=10)
             return
 
