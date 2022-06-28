@@ -125,6 +125,7 @@ async def play_song(ctx,vc,guild_id,index):
 #on ready
 @client.event
 async def on_ready():
+    print(f"{client.user.display_name}",flush=True)
     print("\nHey Mister!",flush=True)
 
 #aki daze!
