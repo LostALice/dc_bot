@@ -25,5 +25,5 @@ if __name__ == "__main__":
         if f.endswith(".py"):
             client.load_extension("cogs." + f[:-3])
 
-    client.run("OTIyODYwNDc3MDU3NDc0NTcx.YcHmyw.169HGtV8pTeZTuAyvAo5-rvHmtw")
+    client.run("TOKEN")
 
