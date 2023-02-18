@@ -4,7 +4,7 @@
 from pytube import YouTube, Playlist, Search
 
 class Tool:
-    def change_url(keywords: tuple) -> str:
+    def change_url(self,keywords: tuple) -> str:
         keywords = list(keywords)
         if "youtube.com/" in keywords[0] or "youtu.be/" in keywords[0]:
             keywords = keywords[0]

@@ -2,8 +2,8 @@
 
 import discord, os
 
-from discord.ext import commands
 from os import getenv
+from discord.ext import commands
 
 prefix = getenv("PREFIX")
 if not prefix:
@@ -25,5 +25,5 @@ if __name__ == "__main__":
         if f.endswith(".py"):
             client.load_extension("cogs." + f[:-3])
 
-    client.run("TOKEN")
+    client.run(getenv("TOKEN"))
 
