@@ -219,7 +219,7 @@ class Music(commands.Cog):
         ch = ctx.author.voice.channel
         self.guild_id = ctx.message.guild.id
 
-        urls = Tool.change_url(keywords)
+        urls = Tool.change_url(keywords=keywords)
         song_list = []
         for url in urls:
             song_list.append(Song_infos(url=url,author=author))

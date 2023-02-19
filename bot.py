@@ -20,6 +20,13 @@ async def on_ready():
     print(f"\n{client.user.display_name}",flush=True)
     print("Ready",flush=True)
 
+#on message
+@client.event
+async def on_message(message):
+    if message.author != client.user:
+        print(message.content,flush=True)
+    await client.process_commands(message)
+
 if __name__ == "__main__":
     for f in os.listdir("./cogs"):
         if f.endswith(".py"):
