@@ -12,6 +12,9 @@ class Cog_extension(commands.Cog):
 
 #Song class
 class Song_infos:
+    """
+        Useless class
+    """
     def __init__(self,url: str, author: str) -> None:
         yt = YouTube(url)
 
@@ -23,6 +26,9 @@ class Song_infos:
 
 #Message class
 class Msg2sql:
+    """
+        Useless class
+    """
     def __init__(self,msg) -> None:
         self.content = msg.content
         self.message_id = msg.id

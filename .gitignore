@@ -1,1 +1,4 @@
 /.vscode
+/mp3/*
+/cogs/__pycache__/*
+/core/__pycache__/*

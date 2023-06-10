@@ -1,14 +1,23 @@
 #Code by AkinoAlice@Tyrant_Rex
 
-import discord, os, asyncio, random
+import discord, os, asyncio, random, re, time
 
-from core.tools import Tool
-from yt_dlp import YoutubeDL
-from discord.ext import commands
+from pytube import YouTube, Playlist, Search
 from core.classes import Song_infos
+from discord.ext import commands
+from yt_dlp import YoutubeDL
+
+class Song_infos:
+    def __init__(self,url: str, author: str) -> None:
+        yt = YouTube(url)
+
+        self.url = yt.watch_url
+        self.duration = yt.length
+        self.author = author.display_name
+        self.title = re.sub(r"[\/\\\:\*\?\"\<\>\|\#]","",yt.title)
 
 class Music(commands.Cog):
-    def __init__(self,client) -> None:
+    def __init__(self, client) -> None:
         self.client = client
         self.SONG_LIST = {}
         # Returns:{
@@ -26,8 +35,12 @@ class Music(commands.Cog):
         #         },
         # }
 
+    @commands.Cog.listener()
+    async def on_ready(self) -> None:
+        print("Music.py is ready")
+
     #Initialize when any command function is called
-    async def init(self,ctx) -> None:
+    async def init(self, ctx) -> None:
         await ctx.channel.purge(limit=1)
 
         self.guild_id = ctx.message.guild.id
@@ -37,8 +50,26 @@ class Music(commands.Cog):
                 "loop": False,
             }
 
+    def change_url(self, keywords: tuple) -> str:
+        keywords = list(keywords)
+        if "youtube.com/" in keywords[0] or "youtu.be/" in keywords[0]:
+            keywords = keywords[0]
+            if "list=" in keywords:
+                _ =  len(Playlist(keywords))
+                if _ == 0:
+                    urls = [YouTube(keywords).watch_url]
+                elif _ >= 75:
+                    urls = list(Playlist(keywords))[:75]
+                else:
+                    urls = list(Playlist(keywords))
+            else:
+                urls = [YouTube(keywords).watch_url]
+        else:
+            urls = [Search(" ".join(keywords)).results[0].watch_url]
+        return urls
+
     #Play song
-    async def play_song(self,ctx,vc) -> None:
+    async def play_song(self, ctx, vc) -> None:
         while vc.is_playing():
             if not vc.is_playing():
                 return
@@ -48,20 +79,23 @@ class Music(commands.Cog):
 
             ydl_opts = {
                 "format": "bestaudio",
-                "outtmpl": f"./mp3/{song.title}.mp3"
+                "outtmpl": f"./mp3/{song.title}.mp3",
+                "quiet" : True,
             }
 
             if not os.path.exists(f"./mp3/{song.title}.mp3"):
                 with YoutubeDL(ydl_opts) as ydl:
-                    ydl.download([song.url])
+                   ydl.download([song.url])
+                print(f"Download finished {song.title}")
 
-            if not self.CHANNEL_OPTS[self.guild_id]["loop"]:
-                self.SONG_LIST[self.guild_id].pop(0)
+            if self.CHANNEL_OPTS[self.guild_id]["loop"]:
+                self.SONG_LIST[self.guild_id].append(self.SONG_LIST[self.guild_id][0])
+            self.SONG_LIST[self.guild_id].pop(0)
 
-            embed = discord.Embed(title=f"Now playing:{song.title} \nBy {song.author}", url=song.url,color=discord.Color.from_rgb(180, 97, 234))
-            await ctx.channel.send(embed = embed, delete_after=song.duration-1)
+            embed = discord.Embed(title=f"Now playing:{song.title} \nBy {song.author}", url=song.url, color=discord.Color.from_rgb(180, 97, 234))
+            await ctx.channel.send(embed=embed, delete_after=song.duration-1)
 
-            vc.play(discord.FFmpegPCMAudio(ydl_opts["outtmpl"]),after=lambda x=None:
+            vc.play(discord.FFmpegPCMAudio(f"./mp3/{song.title}.mp3"), after=lambda x=None:
                     asyncio.run_coroutine_threadsafe(self.play_song(ctx,vc),self.client.loop))
 
         else:
@@ -69,7 +103,7 @@ class Music(commands.Cog):
             await ctx.channel.send("Bye Bye!", delete_after=10)
 
     #Swap order
-    @commands.command(aliases=["sw","SW"],help="""Swap the index {~sw index1 index2}""")
+    @commands.command(aliases=["sw","SW"], help="""Swap the index {~sw index1 index2}""")
     async def swap(self,ctx,*index_: int) -> None:
         await ctx.channel.purge(limit=1)
         self.guild_id = ctx.message.guild.id
@@ -91,7 +125,7 @@ class Music(commands.Cog):
 
 
     #Show the playlist
-    @commands.command(aliases=["pl","PL"],help="""Show song lis""")
+    @commands.command(aliases=["pl","PL"], help="""Show song lis""")
     async def playlist(self,ctx) -> None:
         await self.init(ctx)
 
@@ -108,10 +142,10 @@ class Music(commands.Cog):
         except:
             embed.add_field(name="None",value="""Song name:\tNone\nAdded by:\tNone\n""",inline=False)
 
-        await ctx.channel.send(embed = embed)
+        await ctx.channel.send(embed=embed)
 
     #Clear the playlist
-    @commands.command(pass_context=True,no_pm=True,aliases=["c","C"],help="Clear playlist")
+    @commands.command(pass_context=True, no_pm=True, aliases=["c","C"], help="Clear playlist")
     async def clear(self,ctx) -> None:
         await self.init(ctx)
 
@@ -120,15 +154,14 @@ class Music(commands.Cog):
         if self.guild_id in self.SONG_LIST:
             self.SONG_LIST[self.guild_id] = []
 
-        await ctx.channel.send("Cleared")
+        await ctx.channel.send("Cleared",delete_after=5)
         try:
             await ctx.voice_client.disconnect()
         except:
             pass
 
-
     #Loop song
-    @commands.command(aliases=["lp","LP"],help="""Loop song""")
+    @commands.command(aliases=["lp","LP"], help="""Loop song""")
     async def loop(self,ctx) -> None:
         await self.init(ctx)
 
@@ -141,7 +174,7 @@ class Music(commands.Cog):
             await ctx.channel.send(f"Looping songs!", delete_after=5)
 
     #Skip song
-    @commands.command(aliases=["s","S"],help="""Skip song""")
+    @commands.command(aliases=["s","S"], help="""Skip song""")
     async def skip(self,ctx) -> None:
         await self.init(ctx)
 
@@ -160,7 +193,7 @@ class Music(commands.Cog):
             return
 
     #Remove playlist by index
-    @commands.command(aliases=["rm","r","R"],help="""Remove a song in playlist""")
+    @commands.command(aliases=["rm","r","R"], help="""Remove a song in playlist""")
     async def remove(self,ctx,index: int) -> None:
         await ctx.channel.purge(limit=1)
 
@@ -173,7 +206,7 @@ class Music(commands.Cog):
         await ctx.channel.send("Removed", delete_after=5)
 
     #pause song
-    @commands.command(aliases=["pa","PA"],help="""Pause song""")
+    @commands.command(aliases=["pa","PA"], help="""Pause song""")
     async def pause(self,ctx) -> None:
         await ctx.channel.purge(limit=1)
 
@@ -185,7 +218,7 @@ class Music(commands.Cog):
             await ctx.channel.send("Oniichan this song already paused :<", delete_after=10)
 
     #resume song
-    @commands.command(aliases=["re","RE"],help="""Resume song""")
+    @commands.command(aliases=["re","RE"], help="""Resume song""")
     async def resume(self,ctx) -> None:
         await ctx.channel.purge(limit=1)
 
@@ -197,7 +230,7 @@ class Music(commands.Cog):
             await ctx.channel.send("Maho: Tsudzukeru!", delete_after=5)
 
     #Shuffle song
-    @commands.command(aliases=["sh","SH"],help="""Shuffle song""")
+    @commands.command(aliases=["sh","SH"], help="""Shuffle song""")
     async def shuffle(self,ctx) -> None:
         await ctx.channel.purge(limit=1)
         self.guild_id = ctx.message.guild.id
@@ -206,45 +239,47 @@ class Music(commands.Cog):
 
         await ctx.channel.send("Maho: Gurugurumawaru!", delete_after=5)
 
-    #Play song
-    @commands.command(pass_context=True,aliases=["p","P"],help="""Play song""")
-    async def play(self,ctx, *keywords: str) -> None:
+    # Play song
+    @commands.command(aliases=["P","p"], help="""Play song""")
+    async def play(self, ctx, *keywords: str) -> None:
         await self.init(ctx)
 
         if not keywords:
             await ctx.channel.send("Nothing can play niinii", delete_after=5)
             return
 
-        author = ctx.author
-        ch = ctx.author.voice.channel
+        self.author = ctx.author
+        self.ch = ctx.author.voice.channel
         self.guild_id = ctx.message.guild.id
 
-        urls = Tool.change_url(keywords=keywords)
-        song_list = []
-        for url in urls:
-            song_list.append(Song_infos(url=url,author=author))
+        self.urls = self.change_url(keywords)
+
+        self.song_list = []
+        for url in self.urls:
+            self.song_list.append(Song_infos(url=url,author=self.author))
 
         if self.guild_id in self.SONG_LIST:
-            self.SONG_LIST[self.guild_id].extend(song_list)
+            self.SONG_LIST[self.guild_id].extend(self.song_list)
         else:
-            self.SONG_LIST[self.guild_id] = song_list
+            self.SONG_LIST[self.guild_id] = self.song_list
 
-        if not ch:
+        if not self.ch:
             await ctx.channel.send("You are not in the voice channel niinii", delete_after=5)
             return
+        else:
+            await self.ch.connect()
 
-        await ch.connect()
-        if ch.type == discord.ChannelType.stage_voice:
+        if self.ch.type == discord.ChannelType.stage_voice:
             member = ctx.message.guild.get_member(self.client.user.id)
             await member.edit(suppress = False)
 
         vc = ctx.guild.voice_client
 
         if vc.is_playing():
-            embed = discord.Embed(title=f"Added to the queue \nBy {author}",color=discord.Color.from_rgb(0, 0, 0))
+            embed = discord.Embed(title=f"Added to the queue \nBy {self.author}",color=discord.Color.from_rgb(0, 0, 0))
             await ctx.channel.send(embed = embed, delete_after=10)
         else:
             await self.play_song(ctx,vc)
 
-def setup(client):
-	client.add_cog(Music(client))
+async def setup(client):
+	await client.add_cog(Music(client))
