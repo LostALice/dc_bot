@@ -125,7 +125,7 @@ class Music(commands.Cog):
 
 
     #Show the playlist
-    @commands.command(aliases=["pl", "PL"], help="""Show song lis""")
+    @commands.command(aliases=["pl", "PL"], help="""Show song list""")
     async def playlist(self,ctx) -> None:
         await self.init(ctx)
 
