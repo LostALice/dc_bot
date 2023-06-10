@@ -35,7 +35,7 @@ async def load():
 async def main():
     async with client:
         await load()
-        await client.start("OTIyODYwNDc3MDU3NDc0NTcx.GdC3tk.8eNdptOrwsDTPbVbPgncMQGxdwe1GRLt6abhtc")
+        await client.start(getenv("token"))
 
 if __name__ == "__main__":
     asyncio.run(main())
