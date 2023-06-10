@@ -15,7 +15,7 @@ class Function(Cog_extension):
 
     #aki daze!
     @commands.command(help="""Aki daze!""")
-    async def aki(self,ctx) -> None:
+    async def aki(self, ctx) -> None:
         await ctx.channel.purge(limit=1)
         await ctx.channel.send(f"Ready DAZE My ping is {self.client.latency}!", delete_after=10)
 
@@ -29,13 +29,13 @@ class Debug(Cog_extension):
 
     @commands.is_owner()
     @commands.command(help="""For Bot Author Only""")
-    async def rel(self,ctx) -> None:
+    async def rel(self, ctx) -> None:
         await ctx.channel.purge(limit=1)
         for f in os.listdir("./cogs"):
             if f.endswith(".py"):
                 await self.client.unload_extension(f"cogs.{f[:-3]}")
                 await self.client.load_extension(f"cogs.{f[:-3]}")
-        await ctx.channel.send(f"Reloaded",delete_after=10)
+        await ctx.channel.send(f"Reloaded", delete_after=10)
         print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
 
 async def setup(client):

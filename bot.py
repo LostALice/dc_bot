@@ -9,7 +9,7 @@ prefix = getenv("PREFIX")
 if not prefix:
     prefix = "-"
 
-client = commands.Bot(command_prefix=prefix,activity=discord.Game(name="OniiChan's Heart"),intents=discord.Intents.all())
+client = commands.Bot(command_prefix=prefix,activity=discord.Game(name="OniiChan's Heart"), intents=discord.Intents.all())
 
 if not os.path.exists("./mp3"):
     os.mkdir("./mp3")

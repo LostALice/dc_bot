@@ -15,13 +15,13 @@ class Song_infos:
     """
         Useless class
     """
-    def __init__(self,url: str, author: str) -> None:
+    def __init__(self, url: str, author: str) -> None:
         yt = YouTube(url)
 
         self.url = yt.watch_url
         self.duration = yt.length
         self.author = author.display_name
-        self.title = re.sub(r"[\/\\\:\*\?\"\<\>\|\#]","",yt.title)
+        self.title = re.sub(r"[\/\\\:\*\?\"\<\>\|\#]", "", yt.title)
 
 
 #Message class
@@ -29,7 +29,7 @@ class Msg2sql:
     """
         Useless class
     """
-    def __init__(self,msg) -> None:
+    def __init__(self, msg) -> None:
         self.content = msg.content
         self.message_id = msg.id
         self.message_attachments = [i.url for i in msg.attachments]
