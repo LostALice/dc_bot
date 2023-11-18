@@ -1,9 +1,9 @@
 # Code by AkinoAlice@Tyrant_Rex
 
-import os
+from os import listdir
 
-from discord.ext import commands
 from core.classes import Cog_extension
+from discord.ext import commands
 
 
 class Function(Cog_extension):
@@ -27,18 +27,18 @@ class Debug(Cog_extension):
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
-        print("Function.Debug.py is ready")
+        print(f"{__name__}.Debug is ready")
 
     @commands.is_owner()
     @commands.command(help="""For Bot Author Only""")
     async def rel(self, ctx) -> None:
-        await ctx.channel.purge(limit=1)
-        for f in os.listdir("./cogs"):
-            if f.endswith(".py"):
-                await self.client.unload_extension(f"cogs.{f[:-3]}")
-                await self.client.load_extension(f"cogs.{f[:-3]}")
-        await ctx.channel.send(f"Reloaded", delete_after=10)
         print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+        await ctx.channel.purge(limit=1)
+        for f in listdir("./cogs"):
+            if f.endswith(".py"):
+                await self.client.reload_extension(f"cogs.{f[:-3]}")
+                print(f"cogs.{f[:-3]}")
+        await ctx.channel.send(f"Reloaded", delete_after=10)
 
 
 async def setup(client):
