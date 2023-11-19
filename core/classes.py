@@ -24,7 +24,9 @@ class Song_infos(object):
 
         self.url = yt.watch_url
         self.duration = yt.length
+        self.thumbnail = yt.thumbnail_url
         self.author = creator.display_name  # type: ignore
+        self.icon = creator.display_avatar.url  # type: ignore
         self.title = re.sub(r"[\/\\\:\*\?\"\<\>\|\#]", "", yt.title)
 
 

@@ -84,16 +84,23 @@ class Music(commands.Cog):
             if not os.path.exists(f"./mp3/{song.title}.mp3"):
                 with YoutubeDL(ydl_opts) as ydl:
                     ydl.download([song.url])
-                print(f"Download finished {song.title}")
+                print(f"Download finished {song.title}", flush=True)
 
             if self.CHANNEL_OPTS[guild_id]["loop"]:
                 self.SONG_LIST[guild_id].append(
-                    self.SONG_LIST[guild_id][0])
+                    self.SONG_LIST[guild_id][0]
+                )
             self.SONG_LIST[guild_id].pop(0)
 
             embed = discord.Embed(
-                title=f"Now Playing: {song.title}", description=f"By {song.author}", url=song.url, color=discord.Color.from_rgb(180, 97, 234))
-            embed.set_footer(text=f"Duration {song.duration}")
+                title=f"Now Playing: {song.title}", url=song.url,
+                color=discord.Color.from_rgb(180, 97, 234)
+            )
+            embed.set_footer(
+                text=f"Duration {int(song.duration/3600)}:{int(song.duration/60)%60}:{int(song.duration%60)}"
+            )
+            embed.set_thumbnail(url=song.thumbnail)
+            embed.set_author(name=song.author, icon_url=song.icon)
             await ctx.channel.send(embed=embed, delete_after=song.duration-1)
 
             vc.play(discord.FFmpegPCMAudio(f"./mp3/{song.title}.mp3"), after=lambda x: asyncio.run_coroutine_threadsafe(
@@ -143,8 +150,11 @@ class Music(commands.Cog):
             else:
                 for i in self.SONG_LIST[guild_id]:
                     duration = f"{int(i.duration/3600)}:{int(i.duration/60)%60}:{int(i.duration%60)}"
-                    embed.add_field(name=f"[{self.SONG_LIST[guild_id].index(i)+1}]:{i.title:>3}",
-                                    value=f"""Duration:\t{duration:>3}\nAdded by:\t{i.author:>3}\n""", inline=False)
+                    embed.add_field(
+                        name=f"[{self.SONG_LIST[guild_id].index(i)+1}]:{i.title:>3}",
+                        value=f"""Duration:\t{duration:>3}\nAdded by:\t{i.author:>3}\n""",
+                        inline=False
+                    )
         except:
             embed.add_field(
                 name="None", value="""Song name:\tNone\nAdded by:\tNone\n""", inline=False)
@@ -271,7 +281,6 @@ class Music(commands.Cog):
             return
 
         vc = ctx.voice_client
-        print(vc)
         if not vc:
             await self.ch.connect()
             vc = ctx.voice_client
@@ -294,7 +303,14 @@ class Music(commands.Cog):
 
         if vc.is_playing():
             embed = discord.Embed(
-                title=f"Added {song_list[0].title if len(song_list) else len(song_list) } to the queue \nBy {author}", color=discord.Color.from_rgb(0, 0, 0))
+                title=f"Added {song_list[0].title if len(song_list) else len(song_list)} to the queue \nBy {author}",
+                color=discord.Color.from_rgb(0, 0, 0)
+            )
+            embed.set_author(
+                name=author.display_name,
+                icon_url=author.display_avatar.url
+            )
+            embed.set_thumbnail(url=song_list[0].thumbnail)
             await ctx.channel.send(embed=embed, delete_after=10)
         else:
             asyncio.run_coroutine_threadsafe(
