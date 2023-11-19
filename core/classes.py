@@ -1,29 +1,40 @@
-#Code by AkinoAlice@Tyrant_Rex
+# Code by AkinoAlice@Tyrant_Rex
 
-import discord, re
+import discord
+import re
 
-from pytube import YouTube
+from pytube import YouTube  # type: ignore
 from discord.ext import commands
 
-#Cog class
+
 class Cog_extension(commands.Cog):
+    # Cog class
     def __init__(self, client):
         self.client = client
 
-#Song class
-class Song_infos:
-    def __init__(self,url: str, author: str) -> None:
-        yt = YouTube(url)
+
+class Song_infos(object):
+    # Song class
+    """
+        Useless class
+    """
+
+    def __init__(self, youtube_url: str, creator: discord.Message.author) -> None:
+        yt = YouTube(youtube_url)
 
         self.url = yt.watch_url
         self.duration = yt.length
-        self.author = author.display_name
-        self.title = re.sub(r"[\/\\\:\*\?\"\<\>\|\#]","",yt.title)
+        self.author = creator.display_name  # type: ignore
+        self.title = re.sub(r"[\/\\\:\*\?\"\<\>\|\#]", "", yt.title)
 
 
-#Message class
-class Msg2sql:
-    def __init__(self,msg) -> None:
+class Msg2sql(object):
+    # Message class
+    """
+        To  be
+    """
+
+    def __init__(self, msg) -> None:
         self.content = msg.content
         self.message_id = msg.id
         self.message_attachments = [i.url for i in msg.attachments]
@@ -37,4 +48,3 @@ class Msg2sql:
 
         self.user_id = msg.author.id
         self.author = msg.author.name
-
