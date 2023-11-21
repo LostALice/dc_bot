@@ -51,9 +51,9 @@ class Music(commands.Cog):
 
         youtube_url = re.findall(
             r"^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|live\/|v\/)?)([\w\-]+)(\S+)?$", search_string)
-        youtube_url_string = "".join(youtube_url[0])
 
-        if youtube_url_string:
+        if youtube_url:
+            youtube_url_string = "".join(youtube_url[0])
             if "list=" in youtube_url_string:
                 youtube_playlist = list(Playlist(youtube_url_string))
                 if len(youtube_playlist) == 1:

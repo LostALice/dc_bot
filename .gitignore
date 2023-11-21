@@ -5,6 +5,7 @@
 
 .env.*
 *.log
+test.*
 
 # still working on
 statistic.py
