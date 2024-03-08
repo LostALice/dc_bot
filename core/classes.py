@@ -16,7 +16,26 @@ class Cog_extension(commands.Cog):
 class Song_infos(object):
     # Song class
     """
-        Useless class
+    Represents information about a song, including its YouTube URL, duration, thumbnail, author, icon, and title.
+
+    Args:
+        youtube_url (str): The URL of the YouTube video.
+        creator (discord.Message.author): The author of the Discord message.
+
+    Attributes:
+        url (str): The watch URL of the YouTube video.
+        duration (int): The duration of the YouTube video in seconds.
+        thumbnail (str): The URL of the thumbnail image of the YouTube video.
+        author (str): The display name of the author of the Discord message.
+        icon (str): The URL of the avatar image of the author of the Discord message.
+        title (str): The title of the YouTube video with special characters removed.
+
+    Note:
+        This class requires the 'YouTube' and 're' modules to be imported.
+
+    Example:
+        song_info = Song_infos("https://www.youtube.com/watch?v=dQw4w9WgXcQ", message.author)
+        print(song_info.title)  # Prints the title of the YouTube video
     """
 
     def __init__(self, youtube_url: str, creator: discord.Message.author) -> None:
@@ -30,7 +49,7 @@ class Song_infos(object):
         self.title = re.sub(r"[\/\\\:\*\?\"\<\>\|\#]", "", yt.title)
 
 
-class Msg2sql(object):
+class Msg2DB(object):
     # Message class
     """
         To  be

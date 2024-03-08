@@ -13,30 +13,45 @@ from discord.ext import commands
 
 
 class Music(commands.Cog):
+    """
+    A Discord cog (extension) for managing music-related functionalities.
+
+    Attributes:
+        client: The discord.py client object representing the bot.
+        SONG_LIST (dict[int, list]): A dictionary mapping guild IDs to lists of song information.
+            {
+                "guild_id": [song_info],
+                "guild_id": [song_info],
+            }
+        CHANNEL_OPTS (dict[int, dict[str, bool]]): A dictionary mapping guild IDs to dictionaries
+            containing channel options.
+            {
+                "guild_id": {
+                    "loop": False,
+                },
+                "guild_id": {
+                    "loop": False,
+                },
+            }
+    """
+
     def __init__(self, client) -> None:
+        """
+        Initializes the Music cog.
+
+        Args:
+            client: The discord.py client object representing the bot.
+        """
         self.client = client
         self.SONG_LIST: dict[int, list] = {}
-        # {
-        #   "guild_id":[song_info],
-        #   "guild_id":[song_info],
-        # }
-
         self.CHANNEL_OPTS: dict[int, dict[str, bool]] = {}
-        # {
-        #   "guild_id":{
-        #       "loop":     False,
-        #   },
-        #   "guild_id":{
-        #       "loop":     False,
-        #   },
-        # }
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
         print("Music.py is ready")
 
     # Initialize when any command function is called
-    async def init(self, ctx) -> None:
+    async def init(self, ctx: discord.ext.commands.Message) -> None:
         await ctx.channel.purge(limit=1)
 
         guild_id = ctx.message.guild.id
@@ -47,6 +62,25 @@ class Music(commands.Cog):
             }
 
     def change_url(self, keywords: tuple) -> list[str]:
+        """
+        Changes a given set of keywords into a valid YouTube URL or search results URL.
+
+        Args:
+            keywords (tuple): A tuple of strings containing keywords related to the desired YouTube video.
+
+        Returns:
+            list[str]: A list containing the YouTube URL or search results URL.
+
+        Note:
+            This method requires the 're' module to be imported.
+
+        Example:
+            ```python
+            music_cog = Music(client)
+            urls = music_cog.change_url(("rickroll",))
+            print(urls)  # Example output: ['https://www.youtube.com/watch?v=dQw4w9WgXcQ']
+            ```
+        """
         search_string = " ".join(keywords)
 
         youtube_url = re.findall(
@@ -68,7 +102,30 @@ class Music(commands.Cog):
 
         return urls
 
-    async def play_song(self, ctx: discord.ext.commands.Context, vc: discord.VoiceClient, guild_id: int) -> None:
+    async def play_song(self, ctx: discord.ext.commands.Message, vc: discord.VoiceClient, guild_id: int) -> None:
+        """
+        Asynchronously plays a song in the voice channel.
+
+        Args:
+            ctx (discord.ext.commands.Message): The message context.
+            vc (discord.VoiceClient): The voice client representing the voice channel.
+            guild_id (int): The ID of the guild.
+
+        Note:
+            This method requires the 'asyncio', 'os', 'discord', and 'YoutubeDL' modules to be imported.
+
+        Example:
+            This method is typically called internally within a command. Below is an example of how it can be used:
+
+            ```python
+            @commands.command()
+            async def play(self, ctx, url):
+                vc = await ctx.author.voice.channel.connect()
+                guild_id = ctx.guild.id
+                await self.play_song(ctx, vc, guild_id)
+            ```
+        """
+
         while vc.is_playing():
             if not vc.is_playing():
                 return
@@ -112,7 +169,23 @@ class Music(commands.Cog):
 
     # Swap order
     @commands.command(aliases=["sw", "SW"], help="""Swap the index {~sw index1 index2}""")
-    async def swap(self, ctx, *index_: int) -> None:
+    async def swap(self, ctx: discord.ext.commands.Message, *index_: int) -> None:
+        """
+        Swap the positions of songs in the song list.
+
+        Args:
+            ctx: The context of the message.
+            *index_: Variable number of integers representing the indices of the songs to swap.
+
+        Returns:
+            None
+
+        Note:
+            This command requires valid indices as arguments, and the indices must be within the range of the song list.
+
+        Example:
+            Discord: ~swap 1 2
+        """
         await ctx.channel.purge(limit=1)
         guild_id = ctx.message.guild.id
         count = len(self.SONG_LIST[guild_id])
@@ -134,9 +207,17 @@ class Music(commands.Cog):
         await ctx.channel.send("Swapped", delete_after=5)
 
     # Show the playlist
-
     @commands.command(aliases=["pl", "PL"], help="""Show song list""")
-    async def playlist(self, ctx) -> None:
+    async def playlist(self, ctx: discord.ext.commands.Message) -> None:
+        """
+        Show the current playlist of songs.
+
+        Args:
+            ctx: The context of the message.
+
+        Returns:
+            None
+        """
         await self.init(ctx)
 
         guild_id = ctx.message.guild.id
@@ -163,7 +244,16 @@ class Music(commands.Cog):
 
     # Clear the playlist
     @commands.command(pass_context=True, no_pm=True, aliases=["c", "C"], help="Clear playlist")
-    async def clear(self, ctx) -> None:
+    async def clear(self, ctx: discord.ext.commands.Message) -> None:
+        """
+        Clear the current playlist of songs.
+
+        Args:
+            ctx: The context of the message.
+
+        Returns:
+            None
+        """
         await self.init(ctx)
 
         guild_id = ctx.message.guild.id
@@ -179,7 +269,16 @@ class Music(commands.Cog):
 
     # Loop song
     @commands.command(aliases=["lp", "LP"], help="""Loop song""")
-    async def loop(self, ctx) -> None:
+    async def loop(self, ctx: discord.ext.commands.Message) -> None:
+        """
+        Toggle looping of songs in the playlist.
+
+        Args:
+            ctx: The context of the message.
+
+        Returns:
+            None
+        """
         await self.init(ctx)
 
         guild_id = ctx.message.guild.id
@@ -192,7 +291,16 @@ class Music(commands.Cog):
 
     # Skip song
     @commands.command(aliases=["s", "S"], help="""Skip song""")
-    async def skip(self, ctx) -> None:
+    async def skip(self, ctx: discord.ext.commands.Message) -> None:
+        """
+        Skip the currently playing song.
+
+        Args:
+            ctx: The context of the message.
+
+        Returns:
+            None
+        """
         await self.init(ctx)
 
         vc = ctx.guild.voice_client
@@ -211,7 +319,17 @@ class Music(commands.Cog):
 
     # Remove playlist by index
     @commands.command(aliases=["rm", "r", "R"], help="""Remove a song in playlist""")
-    async def remove(self, ctx, index: int) -> None:
+    async def remove(self, ctx: discord.ext.commands.Message, index: int) -> None:
+        """
+        Remove a song from the playlist by its index.
+
+        Args:
+            ctx: The context of the message.
+            index (int): The index of the song to remove.
+
+        Returns:
+            None
+        """
         await ctx.channel.purge(limit=1)
 
         guild_id = ctx.message.guild.id
@@ -224,7 +342,16 @@ class Music(commands.Cog):
 
     # pause song
     @commands.command(aliases=["pa", "PA"], help="""Pause song""")
-    async def pause(self, ctx) -> None:
+    async def pause(self, ctx: discord.ext.commands.Message) -> None:
+        """
+        Pause the currently playing song.
+
+        Args:
+            ctx: The context of the message.
+
+        Returns:
+            None
+        """
         await ctx.channel.purge(limit=1)
 
         vc = ctx.guild.voice_client
@@ -236,7 +363,16 @@ class Music(commands.Cog):
 
     # resume song
     @commands.command(aliases=["re", "RE"], help="""Resume song""")
-    async def resume(self, ctx) -> None:
+    async def resume(self, ctx: discord.ext.commands.Message) -> None:
+        """
+        Resume the paused song.
+
+        Args:
+            ctx: The context of the message.
+
+        Returns:
+            None
+        """
         await ctx.channel.purge(limit=1)
 
         vc = ctx.guild.voice_client
@@ -248,7 +384,16 @@ class Music(commands.Cog):
 
     # Shuffle song
     @commands.command(aliases=["sh", "SH"], help="""Shuffle song""")
-    async def shuffle(self, ctx) -> None:
+    async def shuffle(self, ctx: discord.ext.commands.Message) -> None:
+        """
+        Shuffle the songs in the playlist.
+
+        Args:
+            ctx: The context of the message.
+
+        Returns:
+            None
+        """
         await ctx.channel.purge(limit=1)
         guild_id = ctx.message.guild.id
 
@@ -258,7 +403,7 @@ class Music(commands.Cog):
 
     # Play song
     @commands.command(aliases=["P", "p"], help="""Play song""")
-    async def play(self, ctx, *keywords: str) -> None:
+    async def play(self, ctx: discord.ext.commands.Message, *keywords: tuple[str]) -> None:
         await self.init(ctx)
 
         if not keywords:
