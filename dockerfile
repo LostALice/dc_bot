@@ -1,4 +1,8 @@
-FROM dc_bot_env:latest
+FROM python:3.12
+
+# No longer use dc_bot environment
+RUN pip install -r req.txt
+RUN apt-get update && apt-get -y install ffmpeg
 
 RUN mkdir /discord
 RUN mkdir /discord/mp3
