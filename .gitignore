@@ -2,10 +2,12 @@
 /mp3/*
 */__pycache__/*
 *pyc
+/Lib
+/Scripts
+/share
 
 .env.*
+.prettierrc
 *.log
+*.cfg
 test.*
-
-# still working on
-statistic.py

@@ -7,7 +7,7 @@ from discord.ext import commands
 
 
 class Function(Cog_extension):
-    def __init__(self, client):
+    def __init__(self, client: commands.Bot) -> None:
         self.client = client
 
     @commands.Cog.listener()
@@ -30,7 +30,7 @@ class Debug(Cog_extension):
         print(f"{__name__}.Debug is ready")
 
     @commands.is_owner()
-    @commands.command(help="""For Bot Author Only""")
+    @commands.command(aliases=["REL"], help="""For Bot Author Only""")
     async def rel(self, ctx) -> None:
         print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
         await ctx.channel.purge(limit=1)
