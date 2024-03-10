@@ -6,7 +6,7 @@
 /Scripts
 /share
 
-.env.*
+.env
 .prettierrc
 *.log
 *.cfg
