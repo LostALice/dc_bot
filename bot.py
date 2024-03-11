@@ -3,11 +3,10 @@
 import asyncio
 import discord
 import logging
-import os
 
 from discord.ext import commands
 from dotenv import load_dotenv
-from os import getenv
+from os import getenv, listdir, environ
 
 # logging
 LOG_HANDLER = logging.FileHandler(
@@ -38,11 +37,10 @@ client = commands.Bot(
 async def on_ready():
     print(f"\n{client.user.display_name} Ready", flush=True)
 
-
 async def main():
     async with client:
         # load cogs
-        for f in os.listdir("./cogs"):
+        for f in listdir("./cogs"):
             if f.endswith(".py"):
                 await client.load_extension(f"cogs.{f[:-3]}")
 

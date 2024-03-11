@@ -7,14 +7,14 @@ from pytube import YouTube  # type: ignore
 from discord.ext import commands
 
 
+# Cog class
 class Cog_extension(commands.Cog):
-    # Cog class
     def __init__(self, client):
         self.client = client
 
 
+# Song class
 class Song_infos(object):
-    # Song class
     """
         Useless class
     """
@@ -30,8 +30,8 @@ class Song_infos(object):
         self.title = re.sub(r"[\/\\\:\*\?\"\<\>\|\#]", "", yt.title)
 
 
-class Msg2sql(object):
-    # Message class
+# Message class
+class MsgWrapper(object):
     """
         To  be
     """
