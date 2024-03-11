@@ -4,16 +4,19 @@ import asyncio
 import discord
 import logging
 
-from discord.ext import commands
+
+from discord.ext import commands, tasks
 from dotenv import load_dotenv
-from os import getenv, listdir, environ
+from os import getenv, listdir
+from datetime import datetime
 
 # logging
 LOG_HANDLER = logging.FileHandler(
     filename="discord.log", encoding="utf-8", mode="w")
 
 # load dev or release environment
-load_dotenv(dotenv_path=".env")
+load_dotenv(dotenv_path=".env.dev")
+st_time = datetime.now()
 
 if getenv("DEBUG") == "True":
     prefix = "-"
@@ -24,13 +27,17 @@ else:
     if not prefix:
         prefix = "~"
 
-client = commands.Bot(
-    command_prefix=commands.when_mentioned_or(prefix),
-    activity=discord.Game(
-        name="OniiChan's Heart"
-    ),
-    intents=discord.Intents.all()
-)
+class Bot(commands.Bot):
+    def __init__(self) -> None:
+        super().__init__(
+            command_prefix=commands.when_mentioned_or(prefix),
+            activity=discord.Game(
+                name="OniiChan's Heart"
+            ),
+            intents=discord.Intents.all(),
+        )
+
+client = Bot()
 
 # on ready
 @client.event
